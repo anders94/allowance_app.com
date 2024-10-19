@@ -58,13 +58,6 @@ block content
       // make send address editable
       $('#to').editableSelect();
 
-      // receive address updater
-      $('#receiveToSelect').on('change', () => {
-        const id = $('#receiveToSelect').find(":selected").val();
-        $('#receiveImg').attr('src', '/qrcode/' + id + '.svg');
-        $('#receiveText').val(id);
-      });
-
       // receive address copier
       $('#receiveCopyButton').on('click', () => {
         const field = document.getElementById('receiveText');
@@ -111,102 +104,62 @@ block content
     };
 
   .container
-    - let total = 0
-    each account in accounts
-      - total += Number(account.available_amount)
-    .row
-      .col-lg
-        .card
-          .card-header
-            h2.card-text= formatter.format(total)
-          .card-body
-            ul#sendReceiveTabs.nav.nav-underline(role='tablist')
-              li.nav-item(role='presentation')
-                button#transactionsTab.nav-link.active(data-bs-toggle='tab', data-bs-target='#transactionsTabPane', type='button', role='tab', aria-controls='transactionsTabPane', aria-selected='true') Activity
-              li.nav-item(role='presentation')
-                button#sendTab.nav-link(data-bs-toggle='tab', data-bs-target='#sendTabPane', type='button', role='tab', aria-controls='sendTabPane', aria-selected='false') Send
-              li.nav-item(role='presentation')
-                button#receiveTab.nav-link(data-bs-toggle='tab', data-bs-target='#receiveTabPane', type='button', role='tab', aria-controls='receiveTabPane', aria-selected='false') Receive
-            .tab-content#sendReceiveTabContent
-              #transactionsTabPane.tab-pane.show.active(role='tabpanel', aria-labelledby='transactionsTab', tabindex=0)
-                .overflow-y-auto#transactions(style='height: 100px')
-                  each transaction in transactions
-                    .list-group-item.list-group-item-action(href='#')
-                      .d-flex.w-100.justify-content-between
-                        h5.mb-1= transaction.withdrawal ? '-' + formatter.format(transaction.amount) : formatter.format(transaction.amount)
-                        small(data-bs-toggle='tooltip', data-bs-placement='top', data-bs-title=datefns.formatDistanceToNow(transaction.created, {addSuffix: true}))= datefns.format(transaction.created, 'PPpp')
-                      p.mb-1 #{transaction.transaction_type_word} from&nbsp;
-                        span(data-bs-toggle='tooltip', data-bs-placement='top', data-bs-title=transaction.from_account_id)=transaction.from_full_name + ' '
-                        span to&nbsp;
-                        span(data-bs-toggle='tooltip', data-bs-placement='top', data-bs-title=transaction.to_account_id)=transaction.to_full_name
-                      textarea.form-control(disabled=true)= transaction.attributes.message
+    .card
+      .card-header
+        h2.card-text= formatter.format(Number(account.available_amount))
+      .card-body
+        ul#sendReceiveTabs.nav.nav-underline(role='tablist')
+          li.nav-item(role='presentation')
+            button#transactionsTab.nav-link.active(data-bs-toggle='tab', data-bs-target='#transactionsTabPane', type='button', role='tab', aria-controls='transactionsTabPane', aria-selected='true') Activity
+          li.nav-item(role='presentation')
+            button#sendTab.nav-link(data-bs-toggle='tab', data-bs-target='#sendTabPane', type='button', role='tab', aria-controls='sendTabPane', aria-selected='false') Send
+          li.nav-item(role='presentation')
+            button#receiveTab.nav-link(data-bs-toggle='tab', data-bs-target='#receiveTabPane', type='button', role='tab', aria-controls='receiveTabPane', aria-selected='false') Receive
+        .tab-content#sendReceiveTabContent
+          #transactionsTabPane.tab-pane.show.active(role='tabpanel', aria-labelledby='transactionsTab', tabindex=0)
+            .overflow-y-auto#transactions(style='height: 100px')
+              each transaction in transactions
+                .list-group-item.list-group-item-action(href='#')
+                  .d-flex.w-100.justify-content-between
+                    h5.mb-1= transaction.withdrawal ? '-' + formatter.format(transaction.amount) : formatter.format(transaction.amount)
+                    small(data-bs-toggle='tooltip', data-bs-placement='top', data-bs-title=datefns.formatDistanceToNow(transaction.created, {addSuffix: true}))= datefns.format(transaction.created, 'PPpp')
+                  p.mb-1 #{transaction.transaction_type_word} from&nbsp;
+                    span(data-bs-toggle='tooltip', data-bs-placement='top', data-bs-title=transaction.from_account_id)=transaction.from_full_name + ' '
+                    span to&nbsp;
+                    span(data-bs-toggle='tooltip', data-bs-placement='top', data-bs-title=transaction.to_account_id)=transaction.to_full_name
+                  textarea.form-control(disabled=true)= transaction.attributes.message
 
-              #sendTabPane.tab-pane(role='tabpanel', aria-labelledby='sendTab', tabindex=0)
-                form(method='POST', action='/send').mt-3
-                  .mb-3
-                    label.form-label(for='fromSelect') From
-                    select.form-select.form-select-lg#fromSelect(name='from')
-                      each account in accounts
-                        option(value=account.id)=formatter.format(account.available_amount) + ' - ' + account.attributes.name
-                  .mb-3
-                    label.form-label(for='amountInput') Amount
-                    .input-group.input-group-lg
-                      span.input-group-text $
-                      input#amountInput.form-control.form-control-lg(type='text', name='amount', aria-label='Amount')
-                  .mb-3
-                    label.form-label(for='toInput') To
-                    .input-group.input-group-lg
-                      select.form-select.form-select-lg#to(name='to')
-                        option
-                        each user in users
-                          option(value=user.id)= user.name
-                      span.input-group-text
-                        img(src='/img/camera.svg', width=32, height=32, data-bs-toggle='modal', data-bs-target='#cameraModal')
-                  .mb-3
-                    label.form-label(for='messageTextarea') Message
-                    textarea#messageTextarea.form-control.form-control-lg(name='message', rows=3, aria-label='Message')
-                  .d-flex.justify-content-end
-                    button.btn.btn-outline-primary(type='submit') Send &gt;&gt;
+          #sendTabPane.tab-pane(role='tabpanel', aria-labelledby='sendTab', tabindex=0)
+            form(method='POST', action='/send').mt-3
+              input(type='hidden', name='from', value=account.id)
+              .mb-3
+                label.form-label(for='amountInput') Amount
+                .input-group.input-group-lg
+                  span.input-group-text $
+                  input#amountInput.form-control.form-control-lg(type='text', name='amount', aria-label='Amount')
+              .mb-3
+                label.form-label(for='toInput') To
+                .input-group.input-group-lg
+                  select.form-select.form-select-lg#to(name='to')
+                    option
+                    each user in users
+                      option(value=user.id)= user.name
+                  span.input-group-text
+                    img(src='/img/camera.svg', width=32, height=32, data-bs-toggle='modal', data-bs-target='#cameraModal')
+              .mb-3
+                label.form-label(for='messageTextarea') Message
+                textarea#messageTextarea.form-control.form-control-lg(name='message', rows=3, aria-label='Message')
+              .d-flex.justify-content-end
+                button.btn.btn-outline-primary(type='submit') Send &gt;&gt;
 
-              #receiveTabPane.tab-pane(role='tabpanel', aria-labelledby='receiveTab', tabindex=0)
-                .mb-3.mt-3
-                  label.form-label(for='receiveToSelect') Account
-                  select.form-select.form-select-lg#receiveToSelect
-                    each account in accounts
-                      option(value=account.id)=formatter.format(account.available_amount) + ' - ' + account.attributes.name
-                .d-flex.justify-content-center
-                  img#receiveImg.img-fluid(src='/qrcode/' + accounts[0].id + '.svg')
-                .d-flex.justify-content-center
-                  .input-group
-                    input#receiveText.form-control(type='text', value=accounts[0].id, style='text-align: center;')
-                    span#receiveCopyButton.input-group-text
-                      img(src='/img/copy.svg', width=24, height=24)
+          #receiveTabPane.tab-pane(role='tabpanel', aria-labelledby='receiveTab', tabindex=0)
+            .d-flex.justify-content-center
+              img#receiveImg.img-fluid(src='/qrcode/' + account.id + '.svg')
+            .d-flex.justify-content-center
+              .input-group
+                input#receiveText.form-control(type='text', value=account.id, style='text-align: center;')
+                span#receiveCopyButton.input-group-text
+                  img(src='/img/copy.svg', width=24, height=24)
 
-          .card-footer
-            p &nbsp;
-
-        br
-
-      .col
-        .card
-          .card-header
-            h2.card-text Accounts
-          .card-body
-            table.table
-              caption Accounts
-              thead
-                tr
-                  td Name
-                  td.text-end Amount
-              tbody
-                each account in accounts
-                  tr
-                    td
-                      a(href='#', onClick='accountModalHandler("' + encodeURI(account.id) + '", "' + encodeURI(account.attributes.name) + '")')= account.attributes.name ? account.attributes.name : account.id
-                    td.text-end= formatter.format(account.available_amount)
-                tr
-                  td
-                  td.text-end
-                    b Total: #{formatter.format(total)}
-          .card-footer
-            button.btn.btn-outline-primary.float-end(onClick='accountModalHandler()') Add
+      .card-footer
+        p &nbsp;
