@@ -1,0 +1,32 @@
+{
+    "name": "bnk.andrs.dev",
+    "version": "0.0.1",
+    "description": "",
+    "main": "index.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/anders94/bnk.andrs.dev.git"
+    },
+    "keywords": [],
+    "author": "Anders Brownworth",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/anders94/bnk.andrs.dev/issues"
+    },
+    "homepage": "https://github.com/anders94/bnk.andrs.dev#readme",
+    "dependencies": {
+        "bcrypt": "^5.1.1",
+        "body-parser": "^1.20.3",
+        "connect-pg-simple": "^10.0.0",
+        "date-fns": "^4.1.0",
+        "db-migrate": "^0.11.14",
+        "db-migrate-pg": "^1.5.2",
+        "express": "^4.21.1",
+        "express-session": "^1.18.1",
+        "express-validator": "^7.2.0",
+        "isomorphic-git": "^1.27.1",
+        "pug": "^3.0.3",
+        "qrcode-svg": "^1.1.0",
+        "uuid": "^10.0.0"
+    }
+}

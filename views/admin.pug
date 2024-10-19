@@ -1,0 +1,53 @@
+extends layout
+
+block content
+  .container
+    .row
+      .col
+        .card
+          .card-header
+            h2.card-text Supply
+          .card-body
+            form(method='POST', action='/admin/supply')
+              input(type='hidden', name='symbol', value='USD')
+              .mb-3
+                label.form-label(for='accountSelect') Account
+                select.form-select#accountSelect(name='accountID')
+                  each account in accounts
+                    option(value=account.id)=formatter.format(account.available_amount) + ' - ' + account.attributes.name
+              .mb-3
+                label.form-label(for='amountInput') Amount
+                input#amountInput.form-control(type='text', name='amount', aria-label='Amount')
+              .mb-3
+                label.form-label(for='activitySelect') Activity
+                select.form-select#activitySelect(name='activity')
+                  option(value='mint', selected) Mint
+                  option(value='burn') Burn
+              .mb-3
+                label.form-label(for='password') Password
+                input#password.form-control(type='password', name='password', placeholder='Password', required)
+                .invalid-tooltip We'll need your password to do this.
+              .d-flex.justify-content-end
+                button.btn.btn-outline-primary#accountActionButton(type='submit') Execute
+
+      .col
+        .card
+          .card-header
+            h2.card-text Users
+          .card-body
+            table.table.table-striped.table-hover
+              caption List of users
+              thead
+                tr
+                  th(scope='col') Name
+                  th(scope='col') Email
+                  th.d-none.d-lg-block(scope='col') Created
+              tbody.table-group-divider
+                each user in users
+                  tr
+                    td= user.full_name
+                    td= user.email
+                    td.d-none.d-lg-block= datefns.format(user.created, 'Pp')
+
+          .card-footer
+            button.btn.btn-secondary.float-end(type='submit') Update (not yet implemented)

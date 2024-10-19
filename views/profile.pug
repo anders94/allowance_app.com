@@ -1,0 +1,22 @@
+extends layout
+
+block content
+  .container
+    .row
+      .col
+        form(method='post', action='/profile')
+          .card
+            .card-header
+              h2.card-text Profile
+            .card-body
+              .form-floating.mb-3
+                input#fullName.form-control(type='text', name='fullName', value=session.user.full_name)
+                label.form-label(for='fullName') Full Name
+              .form-floating.mb-3
+                input#email.form-control(type='text', name='email', value=session.user.email, disabled)
+                label.form-label(for='email') Email
+              .form-floating.mb-3
+                input#password.form-control(type='password', name='password') 
+                label.form-label(for='password') Password
+            .card-footer
+              button.btn.btn-primary.float-end(type='submit') Update
