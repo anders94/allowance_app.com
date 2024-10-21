@@ -1,3 +1,4 @@
+const http = require('http');
 const express = require('express');
 const bodyParser = require('body-parser');
 const session = require('express-session');
@@ -13,11 +14,14 @@ const host = process.env.HOST ? process.env.HOST : '0.0.0.0';
 const routes = require('./routes');
 
 (async () => {
+    const commit = process.env.GIT_COMMIT ? process.env.GIT_COMMIT : await git.log({fs, dir: '.', depth: 1, ref: 'main'});
+
     app.set('view engine', 'pug');
     app.set('trust proxy', true);
     app.use(express.static('public'));
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({extended: true}));
+
     app.use(session({
 	store: new (require('connect-pg-simple')(session))({tableName: 'sessions'}),
 	secret: process.env.COOKIE_SECRET || '9494bf79b057c96fbeb4f3e1c8037551',
@@ -33,8 +37,8 @@ const routes = require('./routes');
 
     }));
 
-    const http = require('http').createServer(app);
-    const commit = await git.log({fs, dir: '.', depth: 1, ref: 'main'});
+    const httpServer = http.createServer(app);
+    const socket = require('./socket')(httpServer);
 
     app.use((req, res, next) => {
 	res.locals.session = req.session;
@@ -48,7 +52,7 @@ const routes = require('./routes');
 
     app.use('/', routes);
 
-    http.listen(port, host, () => {
+    httpServer.listen(port, host, () => {
 	console.log(`Listening on ${host}:${port}`)
 
     });

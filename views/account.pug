@@ -3,6 +3,7 @@ extends layout
 block javascripts
   script(src='/js/lib/qr-scanner.umd.min.js')
   script(src='/js/lib/jquery-editable-select.js')
+  script(src='/socket.io/socket.io.js')
 
 block stylesheets
    link(href='/css/lib/jquery-editable-select.min.css', rel='stylesheet')
@@ -39,7 +40,21 @@ block content
               button.btn.btn-outline-primary#accountActionButton(type='submit') Action
 
   script.
-    $(function() {
+    $(() => {
+      const socket = io();
+
+      socket.on('ping', (msg) => {
+        console.log(msg);
+        socket.emit('pong', msg);
+
+      });
+
+      socket.on('pong', (msg) => {
+        console.log(msg);
+      });
+
+      socket.emit('ping', new Date().toString());
+
       // camera qr scanner modal
       const cameraModal = document.getElementById('cameraModal');
       const qrScanner = new QrScanner(camera, result => {
