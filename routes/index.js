@@ -3,6 +3,7 @@ const router = express.Router();
 
 const authenticate = require('./authenticate');
 const account = require('./account');
+const api = require('./api');
 const send = require('./send');
 const admin = require('./admin');
 const profile = require('./profile');
@@ -26,6 +27,8 @@ router.post('/profile', profile.post);
 
 router.get('/account', account.get);
 router.post('/account', account.post);
+
+router.get('/api/*', api);
 
 router.post('/send', send.post);
 

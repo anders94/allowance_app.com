@@ -25,10 +25,7 @@ INSERT INTO users
 VALUES
   ('Treasury', 'treasury@andrs.dev',
   crypt('banker!', gen_salt('bf')),
-  '{"administrator": true}'::JSONB),
-  ('Administrator', 'admin@andrs.dev',
-  crypt('banker!', gen_salt('bf')),
-  '{"administrator": true, "emailVerified": true}'::JSONB);
+  '{"administrator": true}'::JSONB);
 
 -- Example usage:
 --
@@ -41,9 +38,9 @@ VALUES
 -- --------------------------------------------------------
 
 CREATE TABLE sessions (
-  sid     TEXT          NOT NULL COLLATE "default",
-  sess    JSONB         NOT NULL,
-  expire  TIMESTAMP(6)  NOT NULL
+  sid                UUID            NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+  sess               JSONB           NOT NULL,
+  expire             TIMESTAMP(6)    NOT NULL
 )
 WITH (OIDS=FALSE);
 
@@ -90,8 +87,7 @@ CREATE TABLE accounts (
 INSERT INTO accounts
   (user_id, symbol, attributes)
 VALUES
-  ((SELECT id FROM users WHERE email = 'treasury@andrs.dev'), 'USD', '{"name":"Treasury"}'::JSONB),
-  ((SELECT id FROM users WHERE email = 'admin@andrs.dev'), 'USD', '{"name":"Default"}'::JSONB);
+  ((SELECT id FROM users WHERE email = 'treasury@andrs.dev'), 'USD', '{"name":"Treasury"}'::JSONB);
 
 -- --------------------------------------------------------
 -- -- Table: Transaction Types
@@ -134,6 +130,68 @@ CREATE TABLE transactions (
 ) WITH (OIDS=FALSE);
 
 -- --------------------------------------------------------
+-- -- Table: Groups
+-- --------------------------------------------------------
+--
+-- Chat groups
+
+CREATE TABLE groups (
+  id                       UUID            NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+  created                  TIMESTAMP       NOT NULL DEFAULT now(),
+  title                    TEXT            NOT NULL,
+  attributes               JSONB           NOT NULL DEFAULT '{}'::JSONB,
+  obsolete                 BOOLEAN         NOT NULL DEFAULT FALSE
+) WITH (OIDS=FALSE);
+
+-- --------------------------------------------------------
+-- -- Table: Users to Groups
+-- --------------------------------------------------------
+
+CREATE TABLE users2groups (
+  created                  TIMESTAMP       NOT NULL DEFAULT now(),
+  user_id                  UUID            NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  group_id                 UUID            NOT NULL REFERENCES groups(id) ON DELETE RESTRICT,
+  obsolete                 BOOLEAN         NOT NULL DEFAULT FALSE,
+  CONSTRAINT               pk_users2groups PRIMARY KEY (user_id, group_id)
+) WITH (OIDS=FALSE);
+
+-- --------------------------------------------------------
+-- -- Table: Messages
+-- --------------------------------------------------------
+--
+-- Chat messages associated with groups
+
+CREATE TABLE messages (
+  id                       UUID            NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+  created                  TIMESTAMP       NOT NULL DEFAULT now(),
+  group_id                 UUID            NOT NULL REFERENCES groups(id) ON DELETE RESTRICT,
+  user_id                  UUID            NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  transaction_id           UUID            REFERENCES transaction_types(id) ON DELETE RESTRICT,
+  message                  TEXT            NOT NULL,
+  attributes               JSONB           NOT NULL DEFAULT '{}'::JSONB,
+  obsolete                 BOOLEAN         NOT NULL DEFAULT FALSE
+) WITH (OIDS=FALSE);
+
+-- --------------------------------------------------------
+-- -- Table: Magic Links
+-- --------------------------------------------------------
+--
+-- Links that can be clicked a limited number of times (usually once) that logs a user in
+-- and sends them to a specific page. This is useful for including in verification emails
+-- or invites to new users.
+
+CREATE TABLE magic_links (
+  id                UUID                      NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+  created_at        TIMESTAMP WITH TIME ZONE  NOT NULL DEFAULT now(),
+  expires_at        TIMESTAMP WITH TIME ZONE  NOT NULL DEFAULT now() + INTERVAL '30 days',
+  obsolete          BOOLEAN                   NOT NULL DEFAULT FALSE,
+  destination       TEXT                      NOT NULL,
+  user_id           UUID                      REFERENCES users(id),
+  uses_remaining    INT                       NOT NULL DEFAULT 1,
+  attributes        JSONB                     NOT NULL DEFAULT '{}'::JSONB
+) WITH (OIDS=FALSE);
+
+-- --------------------------------------------------------
 -- -- Function: Mint Funds
 -- --------------------------------------------------------
 --
@@ -156,6 +214,8 @@ BEGIN
   IF NOT FOUND THEN
     RAISE EXCEPTION 'mint_funds(%, %): Account does not exist.', _account_id, _amount;
   END IF;
+
+  EXECUTE FORMAT('NOTIFY "%s"', _account_id);
 
   INSERT INTO transactions
     (
@@ -211,6 +271,8 @@ BEGIN
     RAISE EXCEPTION 'burn_funds(%, %): Insufficient funds. Balance would be %.', _account_id, _amount, available_amount;
   END IF;
 
+  EXECUTE FORMAT('NOTIFY "%s"', _account_id);
+
   INSERT INTO transactions
     (
       amount,
@@ -265,6 +327,9 @@ BEGIN
   IF NOT FOUND THEN
     RAISE EXCEPTION 'lock_funds(%, %): Account does not exist.', _account_id, _amount;
   END IF;
+
+  EXECUTE FORMAT('NOTIFY "%s"', _account_id);
+
 END;
 $$ LANGUAGE plpgsql;
 
@@ -296,6 +361,9 @@ BEGIN
   IF NOT FOUND THEN
     RAISE EXCEPTION 'unlock_funds(%, %): Account does not exist.', _account_id, _amount;
   END IF;
+
+  EXECUTE FORMAT('NOTIFY "%s"', _account_id);
+
 END;
 $$ LANGUAGE plpgsql;
 
@@ -348,6 +416,8 @@ BEGIN
   RETURNING accounts.locked_amount, accounts.available_amount INTO destination_locked_amount, destination_available_amount;
 
   RAISE NOTICE 'destination_locked_amount %, destination_available_amount %', destination_locked_amount, destination_available_amount;
+
+  EXECUTE FORMAT('NOTIFY "%s"', _destination_account_id);
 
   INSERT INTO transactions
     (

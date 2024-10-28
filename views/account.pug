@@ -40,20 +40,31 @@ block content
               button.btn.btn-outline-primary#accountActionButton(type='submit') Action
 
   script.
+    const usdFormatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 2
+    });
+
     $(() => {
       const socket = io();
 
-      socket.on('ping', (msg) => {
-        console.log(msg);
-        socket.emit('pong', msg);
+      socket.on('#{account.id}', (msg) => {
+        $.getJSON('/api/v1/accounts.json', (data) => {
+          if (data && data[0] && data[0].id == '#{account.id}') {
+            $('#balance').text(usdFormatter.format(Number(data[0].available_amount)));
+
+          }
+
+        });
 
       });
 
-      socket.on('pong', (msg) => {
-        console.log(msg);
-      });
+      socket.on('connect', () => {
+        socket.emit('sub', '#{account.id}');
+        console.log('subscribed to #{account.id}');
 
-      socket.emit('ping', new Date().toString());
+      });
 
       // camera qr scanner modal
       const cameraModal = document.getElementById('cameraModal');
@@ -121,7 +132,7 @@ block content
   .container
     .card
       .card-header
-        h2.card-text= formatter.format(Number(account.available_amount))
+        h2#balance.card-text= formatter.format(Number(account.available_amount))
       .card-body
         ul#sendReceiveTabs.nav.nav-underline(role='tablist')
           li.nav-item(role='presentation')

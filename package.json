@@ -25,6 +25,7 @@
         "express-session": "^1.18.1",
         "express-validator": "^7.2.0",
         "isomorphic-git": "^1.27.1",
+        "pg-listen": "^1.7.0",
         "pug": "^3.0.3",
         "qrcode-svg": "^1.1.0",
         "socket.io": "^4.8.0",
