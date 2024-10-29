@@ -7,6 +7,12 @@ module.exports = {
 	password: process.env.PGPASSWORD || 'supersecretpassword',
 	ssl: false,
 	debug: false
+
+    },
+    redis: {
+	host: process.env.REDISHOST || 'localhost',
+	port: process.env.REDISPORT || 6379
+
     }
 
 }
