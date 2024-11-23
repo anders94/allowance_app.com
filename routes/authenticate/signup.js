@@ -11,27 +11,36 @@ const post = async (req, res) => {
 	if (!errors.isEmpty())
 	    throw new Error(errors.array()[0].msg);
 
-        const { fullName, signupEmail, signupPassword } = req.body;
+        const { familyName, yourName, signupEmail, signupPassword } = req.body;
 
-	if (fullName && signupEmail && signupPassword)
-	    console.log('signup', fullName, signupEmail, 'xxx');
+	if (familyName && yourName && signupEmail && signupPassword)
+	    console.log('signup', familyName, yourName, signupEmail, 'xxx');
 	else {
-	    console.log('Expected fullName, signupEmail, signupPassword but got', fullName, signupEmail, signupPassword);
-	    throw new Error('We didn\'t get all of the expected fields from you! We\'re expecting fullName, signupEmail, and signupPassword.');
+	    console.log('Expected familyName, yourName, signupEmail, signupPassword but got', familyName, yourName, signupEmail, signupPassword);
+	    throw new Error('We didn\'t get all of the expected fields from you! We\'re expecting familyName, yourName, signupEmail, and signupPassword.');
 
 	}
 
 	const hashedPassword = await bcrypt.hash(signupPassword, 8);
 
 	await db.query('BEGIN');
-	const userResults = await db.query(
-	    `INSERT INTO users
-               (full_name, email, hashed_password, attributes)
+	const familyResults = await db.query(
+	    `INSERT INTO families
+               (moniker)
              VALUES
-               ($1, $2, $3, $4)
+               ($1)
              RETURNING
                *;`,
-	    [fullName, signupEmail, hashedPassword, {emailVerified: true}]);
+	    [familyName]);
+
+	const userResults = await db.query(
+	    `INSERT INTO users
+               (full_name, family_id, email, hashed_password, attributes)
+             VALUES
+               ($1, $2, $3, $4, $5)
+             RETURNING
+               *;`,
+	    [yourName, familyResults.rows[0].id, signupEmail, hashedPassword, {familyAdministrator: true}]);
 	// TODO: update emailVerified to true above and uncomment the magic stuff below when email is working
 
 	/*
@@ -62,7 +71,7 @@ const post = async (req, res) => {
 	console.log('user', req.session.user.id, '/', signupEmail, 'created');
 
 	res.render('authenticate/signup/thanks', {
-	    title: 'Thanks ' + fullName + ', you are all signed up and logged in!'
+	    title: 'Thanks ' + yourName + ', you are all signed up and logged in!'
 
 	});
 

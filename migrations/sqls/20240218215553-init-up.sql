@@ -4,6 +4,23 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- --------------------------------------------------------
+-- -- Table: famlies
+-- --------------------------------------------------------
+
+CREATE TABLE families (
+  id                 UUID            NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+  created            TIMESTAMP       NOT NULL DEFAULT now(),
+  moniker            TEXT            NOT NULL,
+  attributes         JSONB           NOT NULL DEFAULT '{}'::JSONB,
+  obsolete           BOOLEAN         NOT NULL DEFAULT FALSE
+) WITH (OIDS=FALSE);
+
+INSERT INTO families
+  (moniker, attributes)
+VALUES
+  ('System', '{"administrator": true}'::JSONB);
+
+-- --------------------------------------------------------
 -- -- Table: users
 -- --------------------------------------------------------
 
@@ -13,6 +30,7 @@ CREATE TABLE users (
   full_name          TEXT            NOT NULL,
   email              TEXT            NOT NULL UNIQUE,
   hashed_password    TEXT            NOT NULL,
+  family_id          UUID            NOT NULL REFERENCES families(id),
   attributes         JSONB           NOT NULL DEFAULT '{}'::JSONB,
   obsolete           BOOLEAN         NOT NULL DEFAULT FALSE,
   CONSTRAINT pk_users_email PRIMARY KEY (email)
@@ -21,10 +39,11 @@ CREATE TABLE users (
 CREATE INDEX idx_users_email ON users USING btree (email);
 
 INSERT INTO users
-  (full_name, email, hashed_password, attributes)
+  (full_name, email, hashed_password, family_id, attributes)
 VALUES
   ('Treasury', 'treasury@andrs.dev',
   crypt('banker!', gen_salt('bf')),
+  (SELECT id FROM families WHERE attributes->>'administrator' = 'true'),
   '{"administrator": true}'::JSONB);
 
 -- Example usage:
@@ -410,7 +429,7 @@ BEGIN
 
   UPDATE accounts
   SET
-    available_amount = accounts.available_amount + _amount
+    locked_amount = accounts.locked_amount + _amount
   WHERE
     accounts.id = _destination_account_id
   RETURNING accounts.locked_amount, accounts.available_amount INTO destination_locked_amount, destination_available_amount;
@@ -439,6 +458,9 @@ BEGIN
       (SELECT id FROM transaction_types WHERE transaction_type = 'Payment'),
       json_build_object('message', _message)
     );
+  -- NOTE: this records source and destination AVAILABLE amount in the
+  -- transaction table. there can be discrepancies if the funds remain
+  -- locked for a long time so this should be treated as informational.
 
   RETURN QUERY SELECT _source_account_id, source_locked_amount, source_available_amount;
   RETURN QUERY SELECT _destination_account_id, destination_locked_amount, destination_available_amount;
