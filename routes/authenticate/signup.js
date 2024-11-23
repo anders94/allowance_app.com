@@ -67,6 +67,7 @@ const post = async (req, res) => {
 	await db.query('COMMIT');
 
 	req.session.user = userResults.rows[0]; // TODO: we're logging the user in here - don't do this if email verification is a requirement
+	req.session.user.moniker = familyName;
 
 	console.log('user', req.session.user.id, '/', signupEmail, 'created');
 

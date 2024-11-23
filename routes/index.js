@@ -6,6 +6,7 @@ const account = require('./account');
 const api = require('./api');
 const send = require('./send');
 const admin = require('./admin');
+const family = require('./family');
 const profile = require('./profile');
 const qrcode = require('./qrcode');
 
@@ -33,7 +34,11 @@ router.get('/api/*', api);
 router.post('/send', send.post);
 
 router.get('/admin', admin.get);
-router.post('/admin/supply', admin.supply.post);
+
+router.get('/family', family.get);
+router.post('/family/supply', family.supply.post);
+router.get('/family/invite/:familyID', family.invite.get);
+router.post('/family/invite', family.invite.post);
 
 router.post('/authenticate/signup', authenticate.signup.post);
 router.post('/authenticate/login', authenticate.login.post);

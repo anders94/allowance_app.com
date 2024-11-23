@@ -1,6 +1,5 @@
 const db = require('../../db');
 const config = require('../../config');
-const supply = require('./supply');
 
 const get = async (req, res) => {
     if (!req.session.user || !req.session.user.id || !req.session.user.attributes || !req.session.user.attributes.administrator)
@@ -31,6 +30,6 @@ const get = async (req, res) => {
 };
 
 module.exports = {
-    get: get,
-    supply: supply
+    get: get
+
 };

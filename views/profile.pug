@@ -10,6 +10,9 @@ block content
               h2.card-text Profile
             .card-body
               .form-floating.mb-3
+                input#moniker.form-control(type='text', name='moniker', value=session.user.moniker, disabled)
+                label.form-label(for='moniker') Family
+              .form-floating.mb-3
                 input#fullName.form-control(type='text', name='fullName', value=session.user.full_name)
                 label.form-label(for='fullName') Full Name
               .form-floating.mb-3

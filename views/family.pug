@@ -1,0 +1,66 @@
+extends layout
+
+block content
+  .container
+    .row
+      .col-lg
+        .card
+          .card-header
+            h2.card-text Money Supply
+          .card-body
+            form(method='POST', action='/family/supply')
+              input(type='hidden', name='symbol', value='USD')
+              input(type='hidden', name='accountID', value=account.id)
+              .mb-3
+                label.form-label(for='activitySelect') Activity
+                select.form-select#activitySelect(name='activity')
+                  option(value='mint', selected) Mint
+                  option(value='burn') Burn
+              .mb-3
+                label.form-label(for='amountInput') Amount
+                input#amountInput.form-control(type='text', name='amount', aria-label='Amount')
+              .mb-3
+                label.form-label(for='password') Password
+                input#password.form-control(type='password', name='password', placeholder='Password', required)
+                .invalid-tooltip We'll need your password to do this.
+              .d-flex.justify-content-end
+                button.btn.btn-outline-primary#accountActionButton(type='submit') Execute
+
+      .col-lg
+        .card
+          .card-header
+            h2.card-text Family Members
+          .card-body
+            table.table.table-striped.table-hover
+              caption List of family members
+              thead
+                tr
+                  th(scope='col') Name
+                  th.d-none.d-lg-block(scope='col') Type
+                  th(scope='col') Email
+              tbody.table-group-divider
+                each user in users
+                  tr
+                    td= user.full_name
+                    if user.attributes && user.attributes.familyAdministrator
+                      td.d-none.d-lg-block Owner
+                    else
+                      td.d-none.d-lg-block Member
+                    td= user.email
+          .card-footer
+            p Share so others can join your family.
+            .input-group
+              input#shareLinkText.form-control(type='text', value='https://allowance-app.com/family/invite/' + family.id, style='text-align: center;')
+              span#shareLinkCopyButton.input-group-text
+                img#shareLinkImage(src='/img/copy.svg', width=24, height=24)
+
+  script.
+    $('#shareLinkCopyButton').on('click', () => {
+      const field = document.getElementById('shareLinkText');
+      field.select();
+      field.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(field.value);
+      field.setSelectionRange(0, 0);
+      $('#shareLinkImage').attr('src', '/img/clipboard-check.svg');
+
+    });
