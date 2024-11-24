@@ -2,7 +2,41 @@ extends layout
 
 block content
   .container
-    .row
+    .row.p-2
+      .col
+        .card
+          .card-header
+            h2.card-text Family Invite Link
+          .card-body
+            p Share this link with others so they can join your family. By default, users can only interact with others in the same family.
+            .input-group
+              input#shareLinkText.form-control.form-control-lg(type='text', value='https://allowance-app.com/family/invite/' + family.id, style='text-align: center;')
+              span#shareLinkCopyButton.input-group-text
+                img#shareLinkImage(src='/img/copy.svg', width=24, height=24)
+
+    .row.p-2.g-4
+      .col-lg
+        .card
+          .card-header
+            h2.card-text #{family.moniker} Family
+          .card-body
+            table.table.table-striped.table-hover
+              caption List of family members
+              thead
+                tr
+                  th(scope='col') Name
+                  th(scope='col') Type
+                  th(scope='col') Email
+              tbody.table-group-divider
+                each user in users
+                  tr
+                    td= user.full_name
+                    if user.attributes && user.attributes.familyAdministrator
+                      td Owner
+                    else
+                      td Member
+                    td= user.email
+
       .col-lg
         .card
           .card-header
@@ -26,33 +60,6 @@ block content
               .d-flex.justify-content-end
                 button.btn.btn-outline-primary#accountActionButton(type='submit') Execute
 
-      .col-lg
-        .card
-          .card-header
-            h2.card-text Family Members
-          .card-body
-            table.table.table-striped.table-hover
-              caption List of family members
-              thead
-                tr
-                  th(scope='col') Name
-                  th.d-none.d-lg-block(scope='col') Type
-                  th(scope='col') Email
-              tbody.table-group-divider
-                each user in users
-                  tr
-                    td= user.full_name
-                    if user.attributes && user.attributes.familyAdministrator
-                      td.d-none.d-lg-block Owner
-                    else
-                      td.d-none.d-lg-block Member
-                    td= user.email
-          .card-footer
-            p Share so others can join your family.
-            .input-group
-              input#shareLinkText.form-control(type='text', value='https://allowance-app.com/family/invite/' + family.id, style='text-align: center;')
-              span#shareLinkCopyButton.input-group-text
-                img#shareLinkImage(src='/img/copy.svg', width=24, height=24)
 
   script.
     $('#shareLinkCopyButton').on('click', () => {
