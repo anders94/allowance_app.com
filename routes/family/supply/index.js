@@ -12,7 +12,11 @@ const post = async (req, res, next) => {
 	    `SELECT *
              FROM users
              WHERE id = $1
-               AND attributes->>'administrator' = 'true'`,
+               AND (
+                 attributes->>'administrator' = 'true'
+                 OR
+                 attributes->>'familyAdministrator' = 'true'
+               )`,
 	    [req.session.user.id]);
 
         if (userRes.rows.length != 1)
