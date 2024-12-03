@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS users2groups;
 DROP TABLE IF EXISTS groups;
 DROP TABLE IF EXISTS transactions;
 DROP TABLE IF EXISTS transaction_types;
+DROP TABLE IF EXISTS escrows;
 DROP TABLE IF EXISTS accounts;
 DROP TABLE IF EXISTS assets;
 DROP TABLE IF EXISTS sessions;
