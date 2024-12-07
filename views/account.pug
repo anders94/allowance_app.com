@@ -136,24 +136,26 @@ block content
       .card-body
         ul#sendReceiveTabs.nav.nav-underline(role='tablist')
           li.nav-item(role='presentation')
-            button#transactionsTab.nav-link.active(data-bs-toggle='tab', data-bs-target='#transactionsTabPane', type='button', role='tab', aria-controls='transactionsTabPane', aria-selected='true') Activity
+            button#chatTab.nav-link.active(data-bs-toggle='tab', data-bs-target='#chatTabPane', type='button', role='tab', aria-controls='chatTabPane', aria-selected='true') Chat
           li.nav-item(role='presentation')
             button#sendTab.nav-link(data-bs-toggle='tab', data-bs-target='#sendTabPane', type='button', role='tab', aria-controls='sendTabPane', aria-selected='false') Send
           li.nav-item(role='presentation')
             button#receiveTab.nav-link(data-bs-toggle='tab', data-bs-target='#receiveTabPane', type='button', role='tab', aria-controls='receiveTabPane', aria-selected='false') Receive
         .tab-content#sendReceiveTabContent
-          #transactionsTabPane.tab-pane.show.active(role='tabpanel', aria-labelledby='transactionsTab', tabindex=0)
-            .overflow-y-auto#transactions(style='height: 100px')
-              each transaction in transactions
-                .list-group-item.list-group-item-action(href='#')
-                  .d-flex.w-100.justify-content-between
-                    h5.mb-1= transaction.withdrawal ? '-' + formatter.format(transaction.amount) : formatter.format(transaction.amount)
-                    small(data-bs-toggle='tooltip', data-bs-placement='top', data-bs-title=datefns.formatDistanceToNow(transaction.created, {addSuffix: true}))= datefns.format(transaction.created, 'PPpp')
-                  p.mb-1 #{transaction.transaction_type_word} from&nbsp;
-                    span(data-bs-toggle='tooltip', data-bs-placement='top', data-bs-title=transaction.from_account_id)=transaction.from_full_name + ' '
-                    span to&nbsp;
-                    span(data-bs-toggle='tooltip', data-bs-placement='top', data-bs-title=transaction.to_account_id)=transaction.to_full_name
-                  textarea.form-control(disabled=true)= transaction.attributes.message
+          #chatTabPane.tab-pane.show.active(role='tabpanel', aria-labelledby='chatTab', tabindex=0)
+            .row
+              .col.d-none.d-md-block.col-12.col-md-4
+                ul.list-group
+                  a.list-group-item.list-group-item-action(type='button', aria-current='true') New Chat
+                  a.list-group-item.list-group-item-action.active(href='#', aria-current='true') Taylor
+                  a.list-group-item.list-group-item-action(type='button') Rowan 
+                    span.badge.text-bg-primary.rounded-pill 2
+                  a.list-group-item.list-group-item-action(type='button') Caroline
+              .col.d-block.d-md-none.col-8.col-md-8
+                ul.list-group
+                  a.list-group-item.list-group-item-action(type='button', aria-current='true') &lt;
+              .col.col-8.col-md-8
+                textarea.form-control(rows=10)
 
           #sendTabPane.tab-pane(role='tabpanel', aria-labelledby='sendTab', tabindex=0)
             form(method='POST', action='/send').mt-3
