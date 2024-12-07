@@ -11,6 +11,10 @@ AS $$
 BEGIN
   RAISE NOTICE 'mint_funds(%, %)', _account_id, _amount;
 
+  IF _amount <= 0 THEN
+    RAISE EXCEPTION 'mint_funds(%, %): Amount must be a positive number.', _account_id, _amount;
+  END IF;
+
   UPDATE accounts a
   SET
     available_amount = a.available_amount + _amount
@@ -62,6 +66,10 @@ CREATE FUNCTION burn_funds(_account_id UUID, _amount NUMERIC)
 AS $$
 BEGIN
   RAISE NOTICE 'burn_funds(%, %)', _account_id, _amount;
+
+  IF _amount <= 0 THEN
+    RAISE EXCEPTION 'burn_funds(%, %): Amount must be a positive number.', _account_id, _amount;
+  END IF;
 
   UPDATE accounts a
   SET
@@ -118,6 +126,12 @@ CREATE FUNCTION lock_funds(_account_id UUID, _amount NUMERIC)
 AS $$
 BEGIN
   RAISE NOTICE 'lock_funds(%, %)', _account_id, _amount;
+
+  IF _amount <= 0 THEN
+    RAISE EXCEPTION 'lock_funds(%, %): Amount must be a positive number.', _account_id, _amount;
+  END IF;
+
+
   IF (SELECT a.available_amount FROM accounts a WHERE a.id = _account_id) < _amount THEN
     RAISE EXCEPTION 'lock_funds(%, %): Account lacks sufficient available funds.', _account_id, _amount;
   END IF;
@@ -152,6 +166,11 @@ CREATE FUNCTION unlock_funds(_account_id UUID, _amount NUMERIC)
 AS $$
 BEGIN
   RAISE NOTICE 'unlock_funds(%, %)', _account_id, _amount;
+
+  IF _amount <= 0 THEN
+    RAISE EXCEPTION 'unlock_funds(%, %): Amount must be a positive number.', _account_id, _amount;
+  END IF;
+
   IF (SELECT a.locked_amount FROM accounts a WHERE a.id = _account_id) < _amount THEN
     RAISE EXCEPTION 'unlock_funds(%, %): Account lacks sufficient locked funds.', _account_id, _amount;
   END IF;
@@ -192,6 +211,11 @@ DECLARE
   destination_available_amount NUMERIC;
 BEGIN
   RAISE NOTICE 'move_locked_funds(%, %, %)', _source_account_id, _destination_account_id, _amount;
+
+  IF _amount <= 0 THEN
+    RAISE EXCEPTION 'move_locked_funds(%, %, %): Amount must be a positive number.', _source_account_id, _destination_account_id, _amount;
+  END IF;
+
   IF _source_account_id = _destination_account_id THEN
     RAISE EXCEPTION 'move_locked_funds(%, %, %): Source and destination accounts are the same.', _source_account_id, _destination_account_id, _amount;
   END IF;
@@ -265,6 +289,11 @@ CREATE FUNCTION escrow_funds(_account_id UUID, _amount NUMERIC)
 AS $$
 BEGIN
   RAISE NOTICE 'escrow_funds(%, %)', _account_id, _amount;
+
+  IF _amount <= 0 THEN
+    RAISE EXCEPTION 'escrow_funds(%, %): Amount must be a positive number.', _account_id, _amount;
+  END IF;
+
   IF _amount <= 0 THEN
     RAISE EXCEPTION 'escrow_funds(%, %): Amount must be above 0.', _account_id, _amount;
   END IF;
@@ -300,6 +329,7 @@ DECLARE
   _account_id UUID;
 BEGIN
   RAISE NOTICE 'unescrow_funds(%)', _escrow_id;
+
   SELECT
     e.account_id, e.amount
   FROM escrows e
