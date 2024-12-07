@@ -47,12 +47,15 @@ block content
               input(type='hidden', name='accountID', value=account.id)
               .mb-3
                 label.form-label(for='activitySelect') Activity
-                select.form-select#activitySelect(name='activity')
-                  option(value='mint', selected) Mint
-                  option(value='burn') Burn
+                .form-check
+                  input#mint.form-check-input(type='radio', name='activity', value='mint', checked)
+                  label.form-check-label(for='mint') Mint
+                .form-check
+                  input#burn.form-check-input(type='radio', name='activity' value='burn')
+                  label.form-check-label(for='burn') Burn
               .mb-3
                 label.form-label(for='amountInput') Amount
-                input#amountInput.form-control(type='text', name='amount', aria-label='Amount')
+                input#amountInput.form-control(type='text', name='amount', placeholder='0.00', aria-label='Amount')
               .mb-3
                 label.form-label(for='password') Password
                 input#password.form-control(type='password', name='password', placeholder='Password', required)
