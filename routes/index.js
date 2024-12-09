@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const authenticate = require('./authenticate');
-const account = require('./account');
+const chat = require('./chat');
 const api = require('./api');
 const send = require('./send');
 const admin = require('./admin');
@@ -12,7 +12,7 @@ const qrcode = require('./qrcode');
 
 router.get('/', async (req, res) => {
     if (req.session.user && req.session.user.id)
-	res.redirect('/account');
+	res.redirect('/chat');
     else
 	res.render('index', {
 	    page: 'home'
@@ -26,8 +26,8 @@ router.get('/stats', (req, res) => {
 router.get('/profile', profile.get);
 router.post('/profile', profile.post);
 
-router.get('/account', account.get);
-router.post('/account', account.post);
+router.get('/chat', chat.get);
+router.post('/chat', chat.post);
 
 router.get('/api/*', api);
 

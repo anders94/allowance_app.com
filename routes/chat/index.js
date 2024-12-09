@@ -1,5 +1,35 @@
 const db = require('../../db');
 
+/*
+CREATE TABLE groups (
+  id                       UUID            NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+  created                  TIMESTAMP       NOT NULL DEFAULT now(),
+  title                    TEXT            NOT NULL,
+  attributes               JSONB           NOT NULL DEFAULT '{}'::JSONB,
+  obsolete                 BOOLEAN         NOT NULL DEFAULT FALSE
+) WITH (OIDS=FALSE);
+
+CREATE TABLE users2groups (
+  created                  TIMESTAMP       NOT NULL DEFAULT now(),
+  user_id                  UUID            NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  group_id                 UUID            NOT NULL REFERENCES groups(id) ON DELETE RESTRICT,
+  obsolete                 BOOLEAN         NOT NULL DEFAULT FALSE,
+  CONSTRAINT               pk_users2groups PRIMARY KEY (user_id, group_id)
+) WITH (OIDS=FALSE);
+
+CREATE TABLE messages (
+  id                       UUID            NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+  created                  TIMESTAMP       NOT NULL DEFAULT now(),
+  group_id                 UUID            NOT NULL REFERENCES groups(id) ON DELETE RESTRICT,
+  user_id                  UUID            NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  transaction_id           UUID            REFERENCES transaction_types(id) ON DELETE RESTRICT,
+  message                  TEXT            NOT NULL,
+  attributes               JSONB           NOT NULL DEFAULT '{}'::JSONB,
+  obsolete                 BOOLEAN         NOT NULL DEFAULT FALSE
+) WITH (OIDS=FALSE);
+
+ */
+
 const get = async (req, res, next) => {
     if (req.session.user && req.session.user.id) {
 	const accountRes = await db.query('SELECT * FROM accounts WHERE user_id = $1 ORDER BY created ASC', [req.session.user.id]);
@@ -55,8 +85,8 @@ const get = async (req, res, next) => {
              ORDER BY u.full_name ASC`,
 	    [req.session.user.id]);
 
-	res.render('account', {
-	    page: 'account',
+	res.render('chat', {
+	    page: 'chat',
 	    account: accountRes.rows[0],
 	    users: usersRes.rows,
 	    transactions: transactionRes.rows
@@ -99,7 +129,7 @@ const post = async (req, res, next) => {
 		);
 
 	    }
-	    res.redirect('/account');
+	    res.redirect('/chat');
 
 	}
 	catch (e) {

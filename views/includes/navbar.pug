@@ -8,12 +8,12 @@ nav#navbar.navbar.navbar-expand-sm.fixed-top.bg-body-tertiary.border-bottom
       if session && session.user
         ul.navbar-nav.me-auto.mb-2.mb-md-0
           li.nav-item
-            a(class='nav-link' + (page == 'account' ? ' active' : ''), aria-current='account', href='/account') Home
+            a(class='nav-link' + (page == 'chat' ? ' active' : ''), aria-current='chat', href='/chat') Chat
           li.nav-item
-            a(class='nav-link' + (page == 'profile' ? ' active' : ''), aria-current='account', href='/profile') Profile
+            a(class='nav-link' + (page == 'profile' ? ' active' : ''), aria-current='profile', href='/profile') Profile
           if session.user.attributes && session.user.attributes.familyAdministrator
             li.nav-item
-              a.nav-link.text-body-secondary(href='/family') Family
+              a(class='nav-link' + (page == 'family' ? ' active' : ''), aria-current='family', href='/family') Family
           if session.user.attributes && session.user.attributes.administrator
             li.nav-item
               a.nav-link.text-body-secondary(href='/admin') Admin
