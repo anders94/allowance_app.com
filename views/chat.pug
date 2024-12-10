@@ -47,7 +47,7 @@ block content
                   option(selected) Taylor
                   option Caroline
               .col.col-12.col-md-8
-                textarea.form-control.mb-2(style='height: 400px')
+                iframe#chat.form-control(scrolling='yes')
                 ul#messageMoneyTabs.nav.nav-underline
                   li.nav-item(role='presentation')
                     button#messageTab.nav-link.active(data-bs-toggle='tab', data-bs-target='#messageTabPane', type='button', role='tab', aria-controls='messageTabPane', aria-selected='true') Message
@@ -60,6 +60,7 @@ block content
                       button#messageButton.btn.btn-primary(type='button') Send &gt;&gt;
                   #moneyTabPane.tab-pane(role='tabpanel', aria-labelledby='moneyTab', tabindex=0)
                     .input-group
+                      span.input-group-text Send
                       select.form-select(aria-label='Users')
                         option New User
                         option Rowan
@@ -67,7 +68,7 @@ block content
                         option Caroline
                       span.input-group-text $
                       input#messageInput.form-control(type='number', placeholder='0.00', aria-label='Money', aria-describedby='money')
-                      button#messageButton.btn.btn-primary(type='button') Send Money &gt;&gt;
+                      button#messageButton.btn.btn-primary(type='button') Pay &gt;&gt;
 
           #sendTabPane.tab-pane(role='tabpanel', aria-labelledby='sendTab', tabindex=0)
             form(method='POST', action='/send').mt-3
@@ -101,14 +102,33 @@ block content
                 span#receiveCopyButton.input-group-text
                   img#receiveCopyImage(src='/img/copy.svg', width=24, height=24)
 
-      .card-footer
-        p &nbsp;
-
   script.
+    const chat = document.getElementById('chat');
+    const message = document.getElementById('message');
+
     const usdFormatter = new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       maximumFractionDigits: 2
+    });
+
+    chat.contentDocument.body.innerHTML =
+      '<!DOCTYPE html>' +
+      '<html lang="en">' +
+      ' <head>' +
+      '  <meta charset="utf-8">' +
+      '  <meta name="viewport" content="width=device-width, initial-scale=1">' +
+      '  <link href="/css/lib/bootstrap.min.css" rel="stylesheet">' +
+      ' </head>' +
+      ' <body>' +
+      '  <table id="chatTable" class="table table-sm table-hover table-borderless">' +
+      '  </table>' +
+      ' </body>' +
+      '</html>';
+
+    $(window).on('resize', () => {
+      chat.scrollTop = chat.scrollHeight;
+
     });
 
     $(() => {
@@ -164,9 +184,9 @@ block content
             Math.ceil($('#navbar').height()) -
             Math.ceil($('#footer').height()) -
             350;
-        $('#transactions').height( height < 350 ? 350 : height);
+        $('#chat').height( height < 300 ? 300 : height);
 
       }).resize();
-      $('#transactions').scrollTop($('#transactions')[0].scrollHeight);
+      $('#chat').scrollTop($('#chat')[0].scrollHeight);
 
     });
