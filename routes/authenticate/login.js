@@ -19,7 +19,7 @@ module.exports = {
 	    if (await bcrypt.compare(loginPassword, tmp.rows[0].hashed_password)) {
 		req.session.user = tmp.rows[0];
 
-		res.redirect('/account');
+		res.redirect('/chat');
 
 	    }
 	    else
