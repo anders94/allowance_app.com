@@ -48,9 +48,26 @@ block content
                   option Caroline
               .col.col-12.col-md-8
                 textarea.form-control.mb-2(style='height: 400px')
-                .input-group
-                  input#messageInput.form-control(type='text', aria-label='Message', aria-describedby='message')
-                  button#messageButton.btn.btn-primary(type='button') Send &gt;&gt;
+                ul#messageMoneyTabs.nav.nav-underline
+                  li.nav-item(role='presentation')
+                    button#messageTab.nav-link.active(data-bs-toggle='tab', data-bs-target='#messageTabPane', type='button', role='tab', aria-controls='messageTabPane', aria-selected='true') Message
+                  li.nav-item(role='presentation')
+                    button#moneyTab.nav-link(data-bs-toggle='tab', data-bs-target='#moneyTabPane', type='button', role='tab', aria-controls='moneyTabPane', aria-selected='false') Money
+                .tab-content#messageMoneyContent
+                  #messageTabPane.tab-pane.show.active(role='tabpanel', aria-labelledby='messageTab', tabindex=0)
+                    .input-group
+                      input#messageInput.form-control(type='text', aria-label='Message', aria-describedby='message')
+                      button#messageButton.btn.btn-primary(type='button') Send &gt;&gt;
+                  #moneyTabPane.tab-pane(role='tabpanel', aria-labelledby='moneyTab', tabindex=0)
+                    .input-group
+                      select.form-select(aria-label='Users')
+                        option New User
+                        option Rowan
+                        option(selected) Taylor
+                        option Caroline
+                      span.input-group-text $
+                      input#messageInput.form-control(type='number', placeholder='0.00', aria-label='Money', aria-describedby='money')
+                      button#messageButton.btn.btn-primary(type='button') Send Money &gt;&gt;
 
           #sendTabPane.tab-pane(role='tabpanel', aria-labelledby='sendTab', tabindex=0)
             form(method='POST', action='/send').mt-3
